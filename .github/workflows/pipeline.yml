@@ -10,7 +10,7 @@ on:
 
 jobs:
   simple_deployment_pipeline:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -38,7 +38,7 @@ jobs:
   tag_release:
     name: Bump version and push tag
     needs: [simple_deployment_pipeline]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     if: ${{ github.event_name == 'push' }} # Only on push to main, NOT on PRs
     steps:
       - uses: anothrNick/github-tag-action@1.64.0
