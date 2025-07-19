@@ -10,18 +10,38 @@ on:
 
 jobs:
   simple_deployment_pipeline:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: lts/*
 
       - name: Install dependencies
-        run: npm install
-      - name: Check style
+        run: npm ci
+
+      - name: Lint
         run: npm run eslint
-      - name: Check build
-        run: npm run build
-      - name: Check test
-        run: npm run test
+
+      - name: Run unit tests
+        run: npm test
+
+      - name: Run e2e tests
+        run: npm run test:e2e
+
+      - name: Deploy to Render
+        if: ${{ github.event_name == 'push' }}
+        run: curl -X POST "https://api.render.com/deploy/srv-${{ secrets.RENDER_SERVICE_ID }}?key=${{ secrets.RENDER_API_KEY }}"
+
+  tag_release:
+    name: Bump version and push tag
+    needs: [simple_deployment_pipeline]
+    runs-on: ubuntu-20.04
+    if: ${{ github.event_name == 'push' }} # Only on push to main, NOT on PRs
+    steps:
+      - uses: anothrNick/github-tag-action@1.64.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
+          DEFAULT_BUMP: patch
