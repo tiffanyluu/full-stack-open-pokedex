@@ -42,8 +42,9 @@ jobs:
     name: Bump version and push tag
     needs: [simple_deployment_pipeline]
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'push' }} # Only on push to main, NOT on PRs
+    if: ${{ github.event_name == 'push' }}
     steps:
+      - uses: actions/checkout@v4
       - uses: anothrNick/github-tag-action@1.64.0
         env:
           GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
